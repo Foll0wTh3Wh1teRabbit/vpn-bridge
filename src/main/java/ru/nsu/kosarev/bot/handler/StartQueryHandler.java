@@ -23,12 +23,16 @@ public class StartQueryHandler implements QueryHandler {
 
     @Override
     public void executeQuery(Update update) {
+        log.info("Start <- update: [{}]", update);
+
         SendMessage message = SendMessage.builder()
             .chatId(update.getMessage().getChatId())
             .text(START_MESSAGE)
             .build();
 
         messageClient.sendMessage(message);
+
+        log.info("Start -> ");
     }
 
     @Override

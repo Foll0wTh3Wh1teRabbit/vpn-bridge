@@ -32,6 +32,8 @@ public class IssueConfigQueryHandler implements QueryHandler {
         String configUuid = UUID.randomUUID().toString();
         String shellString = ISSUE_CONFIG_SCRIPT + ' ' + configUuid;
 
+        log.info("IssueConfig <- uuid:[{}]", configUuid);
+
         runIssueScript(shellString)
             .thenRun(
                 () -> {
@@ -45,6 +47,8 @@ public class IssueConfigQueryHandler implements QueryHandler {
                         .build();
 
                     messageClient.sendFile(document);
+
+                    log.info("IssueConfig -> document: [{}]", document);
                 }
             )
             .exceptionally(
