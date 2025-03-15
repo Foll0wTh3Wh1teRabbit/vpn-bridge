@@ -8,4 +8,4 @@ ENV JAVA_OPTS="-Dcom.sun.management.jmxremote=true \
                -Dcom.sun.management.jmxremote.ssl=false \
                -Dcom.sun.management.jmxremote.authenticate=false"
 
-ENTRYPOINT ["java","$JAVA_OPTS","-jar","/vpn-bridge-1.0.0.jar"]
+ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar /vpn-bridge-1.0.0.jar"]
