@@ -21,7 +21,7 @@ public class IssueConfigQueryHandler implements QueryHandler {
 
     private static final Integer LAST_UUID_ENTRY_INDEX = 4;
 
-    private static final String ISSUE_CONFIG_SCRIPT = "/root/wireguard-automated.sh";
+    private static final String ISSUE_CONFIG_SCRIPT = "wireguard-automated.sh";
 
     private static final String CONFIG_MESSAGE = "Ваш конфиг:";
 
