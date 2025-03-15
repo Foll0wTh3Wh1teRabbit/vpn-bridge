@@ -19,6 +19,8 @@ import java.util.function.UnaryOperator;
 @RequiredArgsConstructor
 public class IssueConfigQueryHandler implements QueryHandler {
 
+    private static final Integer LAST_UUID_ENTRY_INDEX = 4;
+
     private static final String ISSUE_CONFIG_SCRIPT = "/root/wireguard-automated.sh";
 
     private static final String CONFIG_MESSAGE = "Ваш конфиг:";
@@ -29,15 +31,15 @@ public class IssueConfigQueryHandler implements QueryHandler {
 
     @Override
     public void executeQuery(Update update) {
-        String configUuid = UUID.randomUUID().toString();
-        String shellString = ISSUE_CONFIG_SCRIPT + ' ' + configUuid;
+        String configUid = UUID.randomUUID().toString().split("-")[LAST_UUID_ENTRY_INDEX];
+        String shellString = ISSUE_CONFIG_SCRIPT + ' ' + configUid;
 
-        log.info("IssueConfig <- uuid:[{}]", configUuid);
+        log.info("IssueConfig <- uuid:[{}]", configUid);
 
         runIssueScript(shellString)
             .thenRun(
                 () -> {
-                    File configFile = new File(PATH_TO_CONFIG_SUPPLIER.apply(configUuid));
+                    File configFile = new File(PATH_TO_CONFIG_SUPPLIER.apply(configUid));
                     InputFile inputFile = new InputFile(configFile);
 
                     SendDocument document = SendDocument.builder()
