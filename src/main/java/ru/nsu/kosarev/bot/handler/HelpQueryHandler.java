@@ -10,33 +10,31 @@ import ru.nsu.kosarev.bot.util.MessageClient;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class StartQueryHandler implements QueryHandler {
+public class HelpQueryHandler implements QueryHandler {
 
-    private static final String START_MESSAGE =
-        """
-        Привет!
-        
-        Для получения списка доступных команд воспользуйтесь командой /help.""";
+    private static final String AVAILABLE_QUERIES = """
+        /issueConfig – выпустить новый конфиг.
+        """;
 
     private final MessageClient messageClient;
 
     @Override
     public void executeQuery(Update update) {
-        log.info("Start <- update: [{}]", update);
+        log.info("Help <- update: [{}]", update);
+
+        Long chatId = update.getMessage().getChatId();
 
         SendMessage message = SendMessage.builder()
-            .chatId(update.getMessage().getChatId())
-            .text(START_MESSAGE)
+            .chatId(chatId)
+            .text(AVAILABLE_QUERIES)
             .build();
 
         messageClient.sendMessage(message);
-
-        log.info("Start -> ");
     }
 
     @Override
     public String getQuery() {
-        return "/start";
+        return "/help";
     }
 
 }

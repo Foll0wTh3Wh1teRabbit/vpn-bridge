@@ -16,6 +16,8 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class QueryResolver {
 
+    private static final String UNEXPECTED_QUERY = "/unexpected";
+
     private static final Map<String, QueryHandler> queryHandlers = new HashMap<>();
 
     private final List<QueryHandler> handlers;
@@ -26,7 +28,7 @@ public class QueryResolver {
     }
 
     public QueryHandler getQueryHandler(String query) {
-        return Optional.ofNullable(queryHandlers.get(query)).orElseThrow(QueryHandlerNotFoundException::new);
+        return Optional.ofNullable(queryHandlers.get(query)).orElse(queryHandlers.get(UNEXPECTED_QUERY));
     }
 
 }

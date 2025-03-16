@@ -34,7 +34,7 @@ public class IssueConfigQueryHandler implements QueryHandler {
         String configUid = UUID.randomUUID().toString().split("-")[LAST_UUID_ENTRY_INDEX];
         String shellString = ISSUE_CONFIG_SCRIPT + ' ' + configUid;
 
-        log.info("IssueConfig <- uuid:[{}]", configUid);
+        log.info("IssueConfig <- update: [{}], uuid:[{}]", update, configUid);
 
         runIssueScript(shellString)
             .thenRun(
