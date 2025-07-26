@@ -1,8 +1,10 @@
-# Build stage
-FROM amazoncorretto:21-alpine
-RUN gradle clean build
+FROM gradle:latest AS BUILD
+WORKDIR /usr/app/
+COPY . .
+RUN gradle build
 
-# Runtime stage
 FROM amazoncorretto:21-alpine
-COPY /build/libs/*.jar vpn-bridge.jar
+WORKDIR /usr/app/
+COPY --from=BUILD /usr/app/build/libs/*.jar vpn-bridge.jar
+
 ENTRYPOINT ["java", "-jar", "vpn-bridge.jar"]
