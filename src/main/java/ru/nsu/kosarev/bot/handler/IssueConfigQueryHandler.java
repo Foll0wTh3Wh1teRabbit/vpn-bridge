@@ -12,39 +12,44 @@ import java.io.File;
 import java.io.IOException;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
-import java.util.function.UnaryOperator;
+import java.util.function.BinaryOperator;
+
+import static ru.nsu.kosarev.bot.util.MessageScriptCommands.*;
 
 @Slf4j
 @Component
 @RequiredArgsConstructor
 public class IssueConfigQueryHandler implements QueryHandler {
 
-    private static final Integer LAST_UUID_ENTRY_INDEX = 4;
+    private static final BinaryOperator<String> CONFIG_NAME_BUILDER =
+        (userId, uuid) -> userId + "-" + uuid;
 
-    private static final String ISSUE_CONFIG_SCRIPT = "wireguard-automated.sh";
-
-    private static final String CONFIG_MESSAGE = "Ваш конфиг:";
-
-    private static final UnaryOperator<String> PATH_TO_CONFIG_SUPPLIER = uuid -> "/root/wg0-client-" + uuid + ".conf";
+    private static final BinaryOperator<String> CONFIG_PATH_BUILDER =
+        (userId, uuid) -> "/root/" + CONFIG_NAME_BUILDER.apply(userId, uuid) + ".conf";
 
     private final MessageClient messageClient;
 
     @Override
     public void executeQuery(Update update) {
-        String configUid = UUID.randomUUID().toString().split("-")[LAST_UUID_ENTRY_INDEX];
-        String shellString = ISSUE_CONFIG_SCRIPT + ' ' + configUid;
+        String userId = Long.toString(update.getMessage().getFrom().getId());
+        String configUuid = UUID.randomUUID().toString();
+        String shellString = String.join(
+            " ",
+            ISSUE_CONFIG_SCRIPT,
+            Integer.toString(ISSUE_CONFIG),
+            CONFIG_NAME_BUILDER.apply(userId, configUuid)
+        );
 
-        log.info("IssueConfig <- update: [{}], uuid:[{}]", update, configUid);
+        log.info("IssueConfig <- update: [{}], configName:[{}]", update, configUuid);
 
         runIssueScript(shellString)
             .thenRun(
                 () -> {
-                    File configFile = new File(PATH_TO_CONFIG_SUPPLIER.apply(configUid));
+                    File configFile = new File(CONFIG_PATH_BUILDER.apply(userId, configUuid));
                     InputFile inputFile = new InputFile(configFile);
 
                     SendDocument document = SendDocument.builder()
                         .chatId(update.getMessage().getChatId())
-                        .caption(CONFIG_MESSAGE)
                         .document(inputFile)
                         .build();
 
