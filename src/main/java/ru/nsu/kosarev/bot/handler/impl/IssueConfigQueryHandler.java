@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.BiFunction;
+import java.util.function.UnaryOperator;
 
 import static ru.nsu.kosarev.bot.util.MessageScriptCommands.ISSUE_CONFIG;
 import static ru.nsu.kosarev.bot.util.MessageScriptCommands.ISSUE_CONFIG_SCRIPT;
@@ -30,8 +31,8 @@ public class IssueConfigQueryHandler implements AvailableQueryHandler {
     private static final BiFunction<Long, String, String> CONFIG_NAME_BUILDER =
         (userId, uuid) -> userId + "-" + uuid;
 
-    private static final BiFunction<Long, String, String> CONFIG_PATH_BUILDER =
-        (userId, configName) -> "/root/" + configName + ".conf";
+    private static final UnaryOperator<String> CONFIG_PATH_BUILDER =
+        (configName) -> "/root/" + configName + ".conf";
 
     private final MessageClient messageClient;
 
@@ -65,7 +66,7 @@ public class IssueConfigQueryHandler implements AvailableQueryHandler {
         runIssueScript(shellString)
             .thenRun(
                 () -> {
-                    File configFile = new File(CONFIG_PATH_BUILDER.apply(userId, configName));
+                    File configFile = new File(CONFIG_PATH_BUILDER.apply(configName));
                     InputFile inputFile = new InputFile(configFile);
 
                     Long chatId = update.getMessage().getChatId();
