@@ -1,16 +1,17 @@
-package ru.nsu.kosarev.bot.handler;
+package ru.nsu.kosarev.bot.handler.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
+import ru.nsu.kosarev.bot.handler.AvailableQueryHandler;
 import ru.nsu.kosarev.bot.util.MessageClient;
 
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class StartQueryHandler implements QueryHandler {
+public class StartQueryHandler implements AvailableQueryHandler {
 
     private static final String START_MESSAGE =
         """
@@ -37,6 +38,11 @@ public class StartQueryHandler implements QueryHandler {
     @Override
     public String getQuery() {
         return "/start";
+    }
+
+    @Override
+    public String getDescription() {
+        return "Стартовать работу с ботом";
     }
 
 }

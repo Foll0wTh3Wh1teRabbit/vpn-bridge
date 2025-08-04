@@ -1,25 +1,31 @@
-package ru.nsu.kosarev.bot.handler;
+package ru.nsu.kosarev.bot.handler.impl;
 
+import com.hazelcast.map.IMap;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendDocument;
 import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.api.objects.Update;
+import ru.nsu.kosarev.bot.handler.AvailableQueryHandler;
+import ru.nsu.kosarev.bot.util.AdminCheckerService;
 import ru.nsu.kosarev.bot.util.MessageClient;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.BinaryOperator;
 
-import static ru.nsu.kosarev.bot.util.MessageScriptCommands.*;
+import static ru.nsu.kosarev.bot.util.MessageScriptCommands.ISSUE_CONFIG;
+import static ru.nsu.kosarev.bot.util.MessageScriptCommands.ISSUE_CONFIG_SCRIPT;
 
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class IssueConfigQueryHandler implements QueryHandler {
+public class IssueConfigQueryHandler implements AvailableQueryHandler {
 
     private static final BinaryOperator<String> CONFIG_NAME_BUILDER =
         (userId, uuid) -> userId + "-" + uuid;
@@ -28,6 +34,10 @@ public class IssueConfigQueryHandler implements QueryHandler {
         (userId, uuid) -> "/root/" + CONFIG_NAME_BUILDER.apply(userId, uuid) + ".conf";
 
     private final MessageClient messageClient;
+
+    private final AdminCheckerService adminCheckerService;
+
+    private final IMap<String, List<File>> hazelcastConfigMap;
 
     @Override
     public void executeQuery(Update update) {
@@ -39,6 +49,12 @@ public class IssueConfigQueryHandler implements QueryHandler {
             Integer.toString(ISSUE_CONFIG),
             CONFIG_NAME_BUILDER.apply(userId, configUuid)
         );
+
+        if (!adminCheckerService.isAdmin(userId) && hazelcastConfigMap.containsKey(userId)) {
+            log.warn("User {} already has config", userId);
+
+            return;
+        }
 
         log.info("IssueConfig <- update: [{}], configName:[{}]", update, configUuid);
 
@@ -54,6 +70,11 @@ public class IssueConfigQueryHandler implements QueryHandler {
                         .build();
 
                     messageClient.sendFile(document);
+
+                    hazelcastConfigMap.compute(
+                        userId,
+                        (id, configs) -> (configs == null) ? new ArrayList<>(List.of(configFile)) : configs
+                    );
 
                     log.info("IssueConfig -> document: [{}]", document);
                 }
@@ -96,6 +117,11 @@ public class IssueConfigQueryHandler implements QueryHandler {
                 }
             }
         );
+    }
+
+    @Override
+    public String getDescription() {
+        return "Выпустить конфиг";
     }
 
 }

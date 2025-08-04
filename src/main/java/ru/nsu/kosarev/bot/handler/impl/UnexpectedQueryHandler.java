@@ -1,10 +1,11 @@
-package ru.nsu.kosarev.bot.handler;
+package ru.nsu.kosarev.bot.handler.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
+import ru.nsu.kosarev.bot.handler.QueryHandler;
 import ru.nsu.kosarev.bot.util.MessageClient;
 
 @Slf4j

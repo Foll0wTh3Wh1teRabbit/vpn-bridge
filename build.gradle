@@ -20,6 +20,8 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter:3.3.2'
     implementation 'org.springframework.boot:spring-boot-starter-web:3.3.2'
 
+    implementation 'com.hazelcast:hazelcast:4.0.2'
+
     implementation 'org.telegram:telegrambots-springboot-longpolling-starter:8.0.0'
     implementation 'org.telegram:telegrambots-client:8.0.0'
 }
