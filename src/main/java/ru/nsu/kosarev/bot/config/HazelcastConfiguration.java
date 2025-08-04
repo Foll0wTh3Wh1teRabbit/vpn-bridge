@@ -13,7 +13,7 @@ import java.util.List;
 public class HazelcastConfiguration {
 
     @Bean
-    public IMap<String, List<File>> hazelcastConfigMap() {
+    public IMap<Long, List<File>> hazelcastConfigMap() {
         return hazelcastInstance().getMap("configs");
     }
 

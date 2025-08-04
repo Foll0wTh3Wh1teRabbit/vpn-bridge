@@ -9,6 +9,9 @@ import org.telegram.telegrambots.longpolling.util.LongPollingSingleThreadUpdateC
 import org.telegram.telegrambots.meta.api.objects.Update;
 import ru.nsu.kosarev.bot.resolver.QueryResolver;
 
+import java.util.Arrays;
+import java.util.List;
+
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -28,8 +31,12 @@ public class VpnBridgeBot implements SpringLongPollingBot, LongPollingSingleThre
 
             if (update.hasMessage()) {
                 String message = update.getMessage().getText();
+                String[] cmdWithArgs = message.strip().split(" +");
 
-                queryResolver.getQueryHandler(message).executeQuery(update);
+                String command = cmdWithArgs[0];
+                List<String> args = Arrays.stream(cmdWithArgs, 1, cmdWithArgs.length).toList();
+
+                queryResolver.getQueryHandler(command).executeQuery(update, args);
             }
         } catch (Exception e) {
             log.error("Unexpected error occurred: ", e);

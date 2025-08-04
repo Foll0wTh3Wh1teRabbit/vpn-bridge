@@ -21,17 +21,18 @@ public class ListConfigQueryHandler implements AvailableQueryHandler {
 
     private final MessageClient messageClient;
 
-    private final IMap<String, List<File>> hazelcastConfigMap;
+    private final IMap<Long, List<File>> hazelcastConfigMap;
 
     @Override
-    public void executeQuery(Update update) {
-        String userId = Long.toString(update.getMessage().getFrom().getId());
+    public void executeQuery(Update update, List<String> args) {
+        Long userId = update.getMessage().getFrom().getId();
+        Long chatId = update.getMessage().getChatId();
 
         log.info("ListConfig <- update: [{}], userId:[{}]", update, userId);
 
         if (!hazelcastConfigMap.containsKey(userId)) {
             SendMessage message = SendMessage.builder()
-                .chatId(update.getMessage().getChatId())
+                .chatId(chatId)
                 .text("У вас нет выпущенных конфигов")
                 .build();
 
@@ -39,7 +40,7 @@ public class ListConfigQueryHandler implements AvailableQueryHandler {
         } else {
             hazelcastConfigMap.get(userId).stream()
                 .map(InputFile::new)
-                .map(file -> SendDocument.builder().chatId(update.getMessage().getChatId()).document(file).build())
+                .map(file -> SendDocument.builder().chatId(chatId).document(file).build())
                 .forEach(messageClient::sendFile);
         }
     }

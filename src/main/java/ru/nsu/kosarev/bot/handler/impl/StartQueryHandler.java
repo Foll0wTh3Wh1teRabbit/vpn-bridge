@@ -8,6 +8,8 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import ru.nsu.kosarev.bot.handler.AvailableQueryHandler;
 import ru.nsu.kosarev.bot.util.MessageClient;
 
+import java.util.List;
+
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -22,11 +24,13 @@ public class StartQueryHandler implements AvailableQueryHandler {
     private final MessageClient messageClient;
 
     @Override
-    public void executeQuery(Update update) {
+    public void executeQuery(Update update, List<String> args) {
         log.info("Start <- update: [{}]", update);
 
+        Long chatId = update.getMessage().getChatId();
+
         SendMessage message = SendMessage.builder()
-            .chatId(update.getMessage().getChatId())
+            .chatId(chatId)
             .text(START_MESSAGE)
             .build();
 

@@ -8,7 +8,7 @@ import org.telegram.telegrambots.meta.api.methods.send.SendDocument;
 import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import ru.nsu.kosarev.bot.handler.AvailableQueryHandler;
-import ru.nsu.kosarev.bot.util.AdminCheckerService;
+import ru.nsu.kosarev.bot.handler.util.AdminCheckerService;
 import ru.nsu.kosarev.bot.util.MessageClient;
 
 import java.io.File;
@@ -17,7 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
-import java.util.function.BinaryOperator;
+import java.util.function.BiFunction;
 
 import static ru.nsu.kosarev.bot.util.MessageScriptCommands.ISSUE_CONFIG;
 import static ru.nsu.kosarev.bot.util.MessageScriptCommands.ISSUE_CONFIG_SCRIPT;
@@ -27,28 +27,21 @@ import static ru.nsu.kosarev.bot.util.MessageScriptCommands.ISSUE_CONFIG_SCRIPT;
 @RequiredArgsConstructor
 public class IssueConfigQueryHandler implements AvailableQueryHandler {
 
-    private static final BinaryOperator<String> CONFIG_NAME_BUILDER =
+    private static final BiFunction<Long, String, String> CONFIG_NAME_BUILDER =
         (userId, uuid) -> userId + "-" + uuid;
 
-    private static final BinaryOperator<String> CONFIG_PATH_BUILDER =
+    private static final BiFunction<Long, String, String> CONFIG_PATH_BUILDER =
         (userId, uuid) -> "/root/" + CONFIG_NAME_BUILDER.apply(userId, uuid) + ".conf";
 
     private final MessageClient messageClient;
 
     private final AdminCheckerService adminCheckerService;
 
-    private final IMap<String, List<File>> hazelcastConfigMap;
+    private final IMap<Long, List<File>> hazelcastConfigMap;
 
     @Override
-    public void executeQuery(Update update) {
-        String userId = Long.toString(update.getMessage().getFrom().getId());
-        String configUuid = UUID.randomUUID().toString();
-        String shellString = String.join(
-            " ",
-            ISSUE_CONFIG_SCRIPT,
-            Integer.toString(ISSUE_CONFIG),
-            CONFIG_NAME_BUILDER.apply(userId, configUuid)
-        );
+    public void executeQuery(Update update, List<String> args) {
+        Long userId = update.getMessage().getFrom().getId();
 
         if (!adminCheckerService.isAdmin(userId) && hazelcastConfigMap.containsKey(userId)) {
             log.warn("User {} already has config", userId);
@@ -56,16 +49,29 @@ public class IssueConfigQueryHandler implements AvailableQueryHandler {
             return;
         }
 
-        log.info("IssueConfig <- update: [{}], configName:[{}]", update, configUuid);
+        String configName;
+        if (args.isEmpty()) {
+            String configUuid = UUID.randomUUID().toString();
+
+            configName = CONFIG_NAME_BUILDER.apply(userId, configUuid);
+        } else {
+            configName = args.getFirst();
+        }
+
+        String shellString = String.join(" ", ISSUE_CONFIG_SCRIPT, Integer.toString(ISSUE_CONFIG), configName);
+
+        log.info("IssueConfig <- update: [{}], configName:[{}]", update, configName);
 
         runIssueScript(shellString)
             .thenRun(
                 () -> {
-                    File configFile = new File(CONFIG_PATH_BUILDER.apply(userId, configUuid));
+                    File configFile = new File(CONFIG_PATH_BUILDER.apply(userId, configName));
                     InputFile inputFile = new InputFile(configFile);
 
+                    Long chatId = update.getMessage().getChatId();
+
                     SendDocument document = SendDocument.builder()
-                        .chatId(update.getMessage().getChatId())
+                        .chatId(chatId)
                         .document(inputFile)
                         .build();
 

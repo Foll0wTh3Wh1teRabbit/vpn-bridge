@@ -8,6 +8,8 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import ru.nsu.kosarev.bot.handler.QueryHandler;
 import ru.nsu.kosarev.bot.util.MessageClient;
 
+import java.util.List;
+
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -19,7 +21,7 @@ public class UnexpectedQueryHandler implements QueryHandler {
     private final MessageClient messageClient;
 
     @Override
-    public void executeQuery(Update update) {
+    public void executeQuery(Update update, List<String> args) {
         log.info("UnexpectedQueryHandler <- update: [{}]", update);
 
         Long chatId = update.getMessage().getChatId();

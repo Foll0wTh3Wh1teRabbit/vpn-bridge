@@ -21,7 +21,7 @@ public class HelpQueryHandler implements AvailableQueryHandler {
     private final List<AvailableQueryHandler> queryHandlers;
 
     @Override
-    public void executeQuery(Update update) {
+    public void executeQuery(Update update, List<String> args) {
         log.info("Help <- update: [{}]", update);
 
         Long chatId = update.getMessage().getChatId();
