@@ -73,7 +73,16 @@ public class IssueConfigQueryHandler implements AvailableQueryHandler {
 
                     hazelcastConfigMap.compute(
                         userId,
-                        (id, configs) -> (configs == null) ? new ArrayList<>(List.of(configFile)) : configs
+                        (id, configs) -> {
+                            if (configs == null) {
+                                return new ArrayList<>(List.of(configFile));
+                            }
+
+                            List<File> modified = new ArrayList<>(configs);
+                            modified.add(configFile);
+
+                            return modified;
+                        }
                     );
 
                     log.info("IssueConfig -> document: [{}]", document);
