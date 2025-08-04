@@ -31,7 +31,7 @@ public class IssueConfigQueryHandler implements AvailableQueryHandler {
         (userId, uuid) -> userId + "-" + uuid;
 
     private static final BiFunction<Long, String, String> CONFIG_PATH_BUILDER =
-        (userId, uuid) -> "/root/" + CONFIG_NAME_BUILDER.apply(userId, uuid) + ".conf";
+        (userId, configName) -> "/root/" + configName + ".conf";
 
     private final MessageClient messageClient;
 
