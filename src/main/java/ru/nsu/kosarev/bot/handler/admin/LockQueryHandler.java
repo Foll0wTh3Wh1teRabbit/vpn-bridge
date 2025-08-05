@@ -53,6 +53,8 @@ public class LockQueryHandler implements AdminQueryHandler {
         processClient.runScript(shellString)
             .exceptionally(
                 th -> {
+                    log.debug("An error occurred", th);
+
                     SendMessage error = SendMessage.builder()
                         .chatId(chatId)
                         .text("Ошибка обработки запроса")
