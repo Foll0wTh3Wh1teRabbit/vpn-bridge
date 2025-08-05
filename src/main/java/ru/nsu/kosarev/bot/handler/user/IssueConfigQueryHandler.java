@@ -58,6 +58,21 @@ public class IssueConfigQueryHandler implements UserQueryHandler {
         }
 
         String configName = args.isEmpty() ? UUID.randomUUID().toString() : args.getFirst();
+        boolean configExists = hazelcastConfigMap.get(userId).stream()
+            .map(File::getName)
+            .anyMatch(configName::equals);
+
+        if (configExists) {
+            SendMessage alreadyHasConfig = SendMessage.builder()
+                .chatId(chatId)
+                .text("У вас уже имеется выпущенный конфиг c таким именем")
+                .build();
+
+            messageClient.sendMessage(alreadyHasConfig);
+
+            return;
+        }
+
         String shellString = String.join(
             " ",
             ISSUE_CONFIG_SCRIPT,
@@ -96,7 +111,7 @@ public class IssueConfigQueryHandler implements UserQueryHandler {
                             }
 
                             List<File> modified = new ArrayList<>(configs);
-                            modified.add(configFile);
+                            modified.add(configFileWithoutUserId);
 
                             return modified;
                         }
