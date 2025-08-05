@@ -45,11 +45,12 @@ public class RemoveQueryHandler implements AdminQueryHandler {
             return;
         }
 
+        Long userToRemove = Long.parseLong(args.getFirst());
         String shellString = String.join(
             " ",
             CONFIG_SCRIPT,
-            Integer.toString(REMOVE_CONFIGS),
-            userId + "-"
+            Integer.toString(LOCK_CONFIGS),
+            userToRemove + "-"
         );
 
         processClient.runScript(shellString)

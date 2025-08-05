@@ -41,11 +41,12 @@ public class UnlockQueryHandler implements AdminQueryHandler {
             return;
         }
 
+        Long userToUnlock = Long.parseLong(args.getFirst());
         String shellString = String.join(
             " ",
             CONFIG_SCRIPT,
-            Integer.toString(UNLOCK_CONFIGS),
-            userId + "-"
+            Integer.toString(LOCK_CONFIGS),
+            userToUnlock + "-"
         );
 
         processClient.runScript(shellString)

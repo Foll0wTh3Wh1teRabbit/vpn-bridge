@@ -12,7 +12,8 @@ import ru.nsu.kosarev.bot.util.ProcessClient;
 
 import java.util.List;
 
-import static ru.nsu.kosarev.bot.util.MessageScriptCommands.*;
+import static ru.nsu.kosarev.bot.util.MessageScriptCommands.CONFIG_SCRIPT;
+import static ru.nsu.kosarev.bot.util.MessageScriptCommands.LOCK_CONFIGS;
 
 @Slf4j
 @Component
@@ -41,11 +42,12 @@ public class LockQueryHandler implements AdminQueryHandler {
             return;
         }
 
+        Long userToLock = Long.parseLong(args.getFirst());
         String shellString = String.join(
             " ",
             CONFIG_SCRIPT,
             Integer.toString(LOCK_CONFIGS),
-            userId + "-"
+            userToLock + "-"
         );
 
         processClient.runScript(shellString)
