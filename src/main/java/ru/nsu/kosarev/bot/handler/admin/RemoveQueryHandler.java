@@ -49,7 +49,7 @@ public class RemoveQueryHandler implements AdminQueryHandler {
         String shellString = String.join(
             " ",
             CONFIG_SCRIPT,
-            Integer.toString(LOCK_CONFIGS),
+            Integer.toString(REMOVE_CONFIGS),
             userToRemove + "-"
         );
 

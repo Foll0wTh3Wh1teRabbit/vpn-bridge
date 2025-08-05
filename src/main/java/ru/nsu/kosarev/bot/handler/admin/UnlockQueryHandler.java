@@ -45,7 +45,7 @@ public class UnlockQueryHandler implements AdminQueryHandler {
         String shellString = String.join(
             " ",
             CONFIG_SCRIPT,
-            Integer.toString(LOCK_CONFIGS),
+            Integer.toString(UNLOCK_CONFIGS),
             userToUnlock + "-"
         );
 
