@@ -11,6 +11,7 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import ru.nsu.kosarev.bot.handler.UserQueryHandler;
 import ru.nsu.kosarev.bot.handler.util.AdminCheckerService;
 import ru.nsu.kosarev.bot.util.MessageClient;
+import ru.nsu.kosarev.bot.util.ProcessClient;
 
 import java.io.File;
 import java.io.IOException;
@@ -19,11 +20,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
 import java.util.function.BiFunction;
 
 import static ru.nsu.kosarev.bot.util.MessageScriptCommands.ISSUE_CONFIG;
-import static ru.nsu.kosarev.bot.util.MessageScriptCommands.ISSUE_CONFIG_SCRIPT;
+import static ru.nsu.kosarev.bot.util.MessageScriptCommands.CONFIG_SCRIPT;
 
 @Slf4j
 @Component
@@ -37,6 +37,8 @@ public class IssueConfigQueryHandler implements UserQueryHandler {
         (userId, name) -> "/root/" + CONFIG_NAME_BUILDER.apply(userId, name) + ".conf";
 
     private final MessageClient messageClient;
+
+    private final ProcessClient processClient;
 
     private final AdminCheckerService adminCheckerService;
 
@@ -80,14 +82,14 @@ public class IssueConfigQueryHandler implements UserQueryHandler {
 
         String shellString = String.join(
             " ",
-            ISSUE_CONFIG_SCRIPT,
+            CONFIG_SCRIPT,
             Integer.toString(ISSUE_CONFIG),
             CONFIG_NAME_BUILDER.apply(userId, configName)
         );
 
         log.info("IssueConfig <- update: [{}], configName:[{}]", update, configName);
 
-        runIssueScript(shellString)
+        processClient.runScript(shellString)
             .thenRun(
                 () -> {
                     File configFile = new File(CONFIG_PATH_BUILDER.apply(userId, configName));
@@ -142,32 +144,6 @@ public class IssueConfigQueryHandler implements UserQueryHandler {
     @Override
     public String getDescription() {
         return "Выпустить конфиг";
-    }
-
-    private CompletableFuture<Void> runIssueScript(String shellString) {
-        return CompletableFuture.runAsync(
-            () -> {
-                ProcessBuilder processBuilder = new ProcessBuilder(shellString.split("\\s"));
-                Process process = null;
-
-                try {
-                    process = processBuilder.start();
-
-                    int processCode = process.waitFor();
-                    if (processCode != 0) {
-                        throw new RuntimeException("Shell command exited with code " + processCode);
-                    }
-                } catch (IOException | InterruptedException e) {
-                    Thread.currentThread().interrupt();
-
-                    throw new RuntimeException("Error running shell command", e);
-                } finally {
-                    if (process != null) {
-                        process.destroy();
-                    }
-                }
-            }
-        );
     }
 
 }
