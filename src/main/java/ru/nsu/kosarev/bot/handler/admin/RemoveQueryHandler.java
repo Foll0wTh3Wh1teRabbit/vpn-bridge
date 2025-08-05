@@ -57,7 +57,12 @@ public class RemoveQueryHandler implements AdminQueryHandler {
             .thenRun(() -> hazelcastConfigMap.remove(userId))
             .exceptionally(
                 th -> {
-                    log.error("An error during issue config has occurred: ", th);
+                    SendMessage error = SendMessage.builder()
+                        .chatId(chatId)
+                        .text("Ошибка обработки запроса")
+                        .build();
+
+                    messageClient.sendMessage(error);
 
                     return null;
                 }

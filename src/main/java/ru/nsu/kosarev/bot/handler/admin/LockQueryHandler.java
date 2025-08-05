@@ -53,7 +53,12 @@ public class LockQueryHandler implements AdminQueryHandler {
         processClient.runScript(shellString)
             .exceptionally(
                 th -> {
-                    log.error("An error during issue config has occurred: ", th);
+                    SendMessage error = SendMessage.builder()
+                        .chatId(chatId)
+                        .text("Ошибка обработки запроса")
+                        .build();
+
+                    messageClient.sendMessage(error);
 
                     return null;
                 }
