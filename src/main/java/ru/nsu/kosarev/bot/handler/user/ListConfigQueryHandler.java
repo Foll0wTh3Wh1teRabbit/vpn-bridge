@@ -1,4 +1,4 @@
-package ru.nsu.kosarev.bot.handler.impl;
+package ru.nsu.kosarev.bot.handler.user;
 
 import com.hazelcast.map.IMap;
 import lombok.RequiredArgsConstructor;
@@ -8,7 +8,7 @@ import org.telegram.telegrambots.meta.api.methods.send.SendDocument;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.api.objects.Update;
-import ru.nsu.kosarev.bot.handler.AvailableQueryHandler;
+import ru.nsu.kosarev.bot.handler.UserQueryHandler;
 import ru.nsu.kosarev.bot.util.MessageClient;
 
 import java.io.File;
@@ -17,7 +17,7 @@ import java.util.List;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class ListConfigQueryHandler implements AvailableQueryHandler {
+public class ListConfigQueryHandler implements UserQueryHandler {
 
     private final MessageClient messageClient;
 

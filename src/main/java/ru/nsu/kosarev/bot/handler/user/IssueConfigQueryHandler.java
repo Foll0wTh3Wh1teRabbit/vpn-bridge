@@ -1,24 +1,25 @@
-package ru.nsu.kosarev.bot.handler.impl;
+package ru.nsu.kosarev.bot.handler.user;
 
 import com.hazelcast.map.IMap;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendDocument;
+import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.api.objects.Update;
-import ru.nsu.kosarev.bot.handler.AvailableQueryHandler;
+import ru.nsu.kosarev.bot.handler.UserQueryHandler;
 import ru.nsu.kosarev.bot.handler.util.AdminCheckerService;
 import ru.nsu.kosarev.bot.util.MessageClient;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.BiFunction;
-import java.util.function.UnaryOperator;
 
 import static ru.nsu.kosarev.bot.util.MessageScriptCommands.ISSUE_CONFIG;
 import static ru.nsu.kosarev.bot.util.MessageScriptCommands.ISSUE_CONFIG_SCRIPT;
@@ -26,13 +27,13 @@ import static ru.nsu.kosarev.bot.util.MessageScriptCommands.ISSUE_CONFIG_SCRIPT;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class IssueConfigQueryHandler implements AvailableQueryHandler {
+public class IssueConfigQueryHandler implements UserQueryHandler {
 
     private static final BiFunction<Long, String, String> CONFIG_NAME_BUILDER =
-        (userId, uuid) -> userId + "-" + uuid;
+        (userId, name) -> userId + "-" + name;
 
-    private static final UnaryOperator<String> CONFIG_PATH_BUILDER =
-        (configName) -> "/root/" + configName + ".conf";
+    private static final BiFunction<Long, String, String> CONFIG_PATH_BUILDER =
+        (userId, name) -> "/root/" + CONFIG_NAME_BUILDER.apply(userId, name) + ".conf";
 
     private final MessageClient messageClient;
 
@@ -43,33 +44,42 @@ public class IssueConfigQueryHandler implements AvailableQueryHandler {
     @Override
     public void executeQuery(Update update, List<String> args) {
         Long userId = update.getMessage().getFrom().getId();
+        Long chatId = update.getMessage().getChatId();
 
         if (!adminCheckerService.isAdmin(userId) && hazelcastConfigMap.containsKey(userId)) {
-            log.warn("User {} already has config", userId);
+            SendMessage alreadyHasConfig = SendMessage.builder()
+                .chatId(chatId)
+                .text("У вас уже имеется выпущенный конфиг")
+                .build();
+
+            messageClient.sendMessage(alreadyHasConfig);
 
             return;
         }
 
-        String configName;
-        if (args.isEmpty()) {
-            String configUuid = UUID.randomUUID().toString();
-
-            configName = CONFIG_NAME_BUILDER.apply(userId, configUuid);
-        } else {
-            configName = args.getFirst();
-        }
-
-        String shellString = String.join(" ", ISSUE_CONFIG_SCRIPT, Integer.toString(ISSUE_CONFIG), configName);
+        String configName = args.isEmpty() ? UUID.randomUUID().toString() : args.getFirst();
+        String shellString = String.join(
+            " ",
+            ISSUE_CONFIG_SCRIPT,
+            Integer.toString(ISSUE_CONFIG),
+            CONFIG_NAME_BUILDER.apply(userId, configName)
+        );
 
         log.info("IssueConfig <- update: [{}], configName:[{}]", update, configName);
 
         runIssueScript(shellString)
             .thenRun(
                 () -> {
-                    File configFile = new File(CONFIG_PATH_BUILDER.apply(configName));
-                    InputFile inputFile = new InputFile(configFile);
+                    File configFile = new File(CONFIG_PATH_BUILDER.apply(userId, configName));
+                    File configFileWithoutUserId = new File(configName);
 
-                    Long chatId = update.getMessage().getChatId();
+                    try {
+                        Files.copy(configFile.toPath(), configFileWithoutUserId.toPath());
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+
+                    InputFile inputFile = new InputFile(configFileWithoutUserId);
 
                     SendDocument document = SendDocument.builder()
                         .chatId(chatId)
@@ -109,6 +119,11 @@ public class IssueConfigQueryHandler implements AvailableQueryHandler {
         return "/issueConfig";
     }
 
+    @Override
+    public String getDescription() {
+        return "Выпустить конфиг";
+    }
+
     private CompletableFuture<Void> runIssueScript(String shellString) {
         return CompletableFuture.runAsync(
             () -> {
@@ -133,11 +148,6 @@ public class IssueConfigQueryHandler implements AvailableQueryHandler {
                 }
             }
         );
-    }
-
-    @Override
-    public String getDescription() {
-        return "Выпустить конфиг";
     }
 
 }

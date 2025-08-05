@@ -1,4 +1,4 @@
-package ru.nsu.kosarev.bot.handler.impl;
+package ru.nsu.kosarev.bot.handler.other;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,7 +16,7 @@ import java.util.List;
 public class UnexpectedQueryHandler implements QueryHandler {
 
     private static final String UNEXPECTED_QUERY_MESSAGE =
-        "Неизвестный тип запроса.\n\nИнформация о доступных запросах: /help";
+        "Неизвестный тип запроса.\nИнформация о доступных запросах: /help";
 
     private final MessageClient messageClient;
 

@@ -9,7 +9,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class AdminCheckerService {
 
-    private static final List<Long> ADMINS = List.of(446488200L);
+    private static final List<Long> ADMINS = List.of(446488200L, 5396520539L);
 
     public boolean isAdmin(Long userId) {
         return ADMINS.contains(userId);

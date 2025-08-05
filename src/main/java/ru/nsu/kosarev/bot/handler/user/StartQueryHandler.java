@@ -1,11 +1,11 @@
-package ru.nsu.kosarev.bot.handler.impl;
+package ru.nsu.kosarev.bot.handler.user;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
-import ru.nsu.kosarev.bot.handler.AvailableQueryHandler;
+import ru.nsu.kosarev.bot.handler.UserQueryHandler;
 import ru.nsu.kosarev.bot.util.MessageClient;
 
 import java.util.List;
@@ -13,13 +13,10 @@ import java.util.List;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class StartQueryHandler implements AvailableQueryHandler {
+public class StartQueryHandler implements UserQueryHandler {
 
     private static final String START_MESSAGE =
-        """
-        Привет!
-        
-        Для получения списка доступных команд воспользуйтесь командой /help.""";
+        "Привет!\nДля получения списка доступных команд воспользуйтесь командой /help.";
 
     private final MessageClient messageClient;
 

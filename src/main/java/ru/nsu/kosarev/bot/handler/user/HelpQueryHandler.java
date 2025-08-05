@@ -1,11 +1,13 @@
-package ru.nsu.kosarev.bot.handler.impl;
+package ru.nsu.kosarev.bot.handler.user;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
-import ru.nsu.kosarev.bot.handler.AvailableQueryHandler;
+import ru.nsu.kosarev.bot.handler.AdminQueryHandler;
+import ru.nsu.kosarev.bot.handler.UserQueryHandler;
+import ru.nsu.kosarev.bot.handler.util.AdminCheckerService;
 import ru.nsu.kosarev.bot.util.MessageClient;
 
 import java.util.List;
@@ -14,19 +16,27 @@ import java.util.stream.Collectors;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class HelpQueryHandler implements AvailableQueryHandler {
+public class HelpQueryHandler implements UserQueryHandler {
 
     private final MessageClient messageClient;
 
-    private final List<AvailableQueryHandler> queryHandlers;
+    private final AdminCheckerService adminCheckerService;
+
+    private final List<UserQueryHandler> userQueryHandlers;
+
+    private final List<AdminQueryHandler> adminQueryHandlers;
 
     @Override
     public void executeQuery(Update update, List<String> args) {
         log.info("Help <- update: [{}]", update);
 
+        Long userId = update.getMessage().getFrom().getId();
         Long chatId = update.getMessage().getChatId();
 
-        String queriesHelpString = queryHandlers.stream()
+        List<? extends UserQueryHandler> handlersToDisplay = adminCheckerService.isAdmin(userId) ?
+            adminQueryHandlers : userQueryHandlers;
+
+        String queriesHelpString = handlersToDisplay.stream()
             .map(query -> String.format("%s - %s", query.getQuery(), query.getDescription()))
             .collect(Collectors.joining("\n"));
 
