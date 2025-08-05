@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.BiFunction;
@@ -58,9 +59,13 @@ public class IssueConfigQueryHandler implements UserQueryHandler {
         }
 
         String configName = args.isEmpty() ? UUID.randomUUID().toString() : args.getFirst();
-        boolean configExists = hazelcastConfigMap.get(userId).stream()
-            .map(File::getName)
-            .anyMatch(configName::equals);
+        boolean configExists = Optional.ofNullable(hazelcastConfigMap.get(userId))
+            .map(
+                fileList -> fileList.stream()
+                    .map(File::getName)
+                    .anyMatch(configName::equals)
+            )
+            .orElse(false);
 
         if (configExists) {
             SendMessage alreadyHasConfig = SendMessage.builder()
