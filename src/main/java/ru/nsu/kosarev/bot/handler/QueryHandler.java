@@ -10,4 +10,6 @@ public interface QueryHandler {
 
     String getQuery();
 
+    String getDescription();
+
 }

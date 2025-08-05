@@ -112,7 +112,7 @@ public class IssueConfigQueryHandler implements UserQueryHandler {
                         userId,
                         (id, configs) -> {
                             if (configs == null) {
-                                return new ArrayList<>(List.of(configFile));
+                                return new ArrayList<>(List.of(configFileWithoutUserId));
                             }
 
                             List<File> modified = new ArrayList<>(configs);

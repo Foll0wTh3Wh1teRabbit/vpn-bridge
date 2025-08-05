@@ -39,4 +39,9 @@ public class UnexpectedQueryHandler implements QueryHandler {
         return "/unexpected";
     }
 
+    @Override
+    public String getDescription() {
+        return "Неожиданный вызов";
+    }
+
 }

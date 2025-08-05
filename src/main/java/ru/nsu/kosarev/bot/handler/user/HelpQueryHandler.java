@@ -6,12 +6,14 @@ import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import ru.nsu.kosarev.bot.handler.AdminQueryHandler;
+import ru.nsu.kosarev.bot.handler.QueryHandler;
 import ru.nsu.kosarev.bot.handler.UserQueryHandler;
 import ru.nsu.kosarev.bot.handler.util.AdminCheckerService;
 import ru.nsu.kosarev.bot.util.MessageClient;
 
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Slf4j
 @Component
@@ -33,8 +35,9 @@ public class HelpQueryHandler implements UserQueryHandler {
         Long userId = update.getMessage().getFrom().getId();
         Long chatId = update.getMessage().getChatId();
 
-        List<? extends UserQueryHandler> handlersToDisplay = adminCheckerService.isAdmin(userId) ?
-            adminQueryHandlers : userQueryHandlers;
+        List<? extends QueryHandler> handlersToDisplay = adminCheckerService.isAdmin(userId) ?
+            Stream.concat(userQueryHandlers.stream(), adminQueryHandlers.stream()).toList() :
+            userQueryHandlers;
 
         String queriesHelpString = handlersToDisplay.stream()
             .map(query -> String.format("%s - %s", query.getQuery(), query.getDescription()))
