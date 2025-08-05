@@ -22,8 +22,8 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.function.BiFunction;
 
-import static ru.nsu.kosarev.bot.util.MessageScriptCommands.ISSUE_CONFIG;
 import static ru.nsu.kosarev.bot.util.MessageScriptCommands.CONFIG_SCRIPT;
+import static ru.nsu.kosarev.bot.util.MessageScriptCommands.ISSUE_CONFIG;
 
 @Slf4j
 @Component
@@ -93,15 +93,14 @@ public class IssueConfigQueryHandler implements UserQueryHandler {
             .thenRun(
                 () -> {
                     File configFile = new File(CONFIG_PATH_BUILDER.apply(userId, configName));
-                    File configFileWithoutUserId = new File(configName);
 
                     try {
-                        Files.copy(configFile.toPath(), configFileWithoutUserId.toPath());
+                        Files.copy(configFile.toPath(), configFile.toPath());
                     } catch (IOException e) {
                         throw new RuntimeException(e);
                     }
 
-                    InputFile inputFile = new InputFile(configFileWithoutUserId);
+                    InputFile inputFile = new InputFile(configFile);
 
                     SendDocument document = SendDocument.builder()
                         .chatId(chatId)
@@ -114,11 +113,11 @@ public class IssueConfigQueryHandler implements UserQueryHandler {
                         userId,
                         (id, configs) -> {
                             if (configs == null) {
-                                return new ArrayList<>(List.of(configFileWithoutUserId));
+                                return new ArrayList<>(List.of(configFile));
                             }
 
                             List<File> modified = new ArrayList<>(configs);
-                            modified.add(configFileWithoutUserId);
+                            modified.add(configFile);
 
                             return modified;
                         }
