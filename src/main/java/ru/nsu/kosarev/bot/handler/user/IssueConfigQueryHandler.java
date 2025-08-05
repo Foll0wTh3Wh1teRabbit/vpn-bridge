@@ -31,10 +31,10 @@ import static ru.nsu.kosarev.bot.util.MessageScriptCommands.ISSUE_CONFIG;
 public class IssueConfigQueryHandler implements UserQueryHandler {
 
     private static final BiFunction<Long, String, String> CONFIG_NAME_BUILDER =
-        (userId, name) -> userId + "-" + name;
+        (userId, name) -> userId + "-" + name + ".conf";
 
     private static final BiFunction<Long, String, String> CONFIG_PATH_BUILDER =
-        (userId, name) -> "/root/" + CONFIG_NAME_BUILDER.apply(userId, name) + ".conf";
+        (userId, name) -> "/root/" + CONFIG_NAME_BUILDER.apply(userId, name);
 
     private final MessageClient messageClient;
 
@@ -65,7 +65,6 @@ public class IssueConfigQueryHandler implements UserQueryHandler {
             .map(
                 fileList -> fileList.stream()
                     .map(File::getName)
-                    .peek(System.out::println)
                     .anyMatch(CONFIG_NAME_BUILDER.apply(userId, configName)::equals)
             )
             .orElse(false);
