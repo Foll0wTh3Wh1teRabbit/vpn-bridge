@@ -65,6 +65,7 @@ public class IssueConfigQueryHandler implements UserQueryHandler {
             .map(
                 fileList -> fileList.stream()
                     .map(File::getName)
+                    .peek(System.out::println)
                     .anyMatch(CONFIG_NAME_BUILDER.apply(userId, configName)::equals)
             )
             .orElse(false);
